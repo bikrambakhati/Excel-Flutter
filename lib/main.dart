@@ -65,12 +65,19 @@ class _ExcelState extends State<Excel> {
         //   element.jumpTo(element.position.pixels - details.delta.dy);
         // }),
         child: ListView.builder(itemBuilder: (context, columnIndex) {
-          ScrollController controller = ScrollController(
+          ScrollController? controller;
+          detach(_) {
+            controller?.dispose();
+            controllers.remove(controller);
+          }
+
+          controller = ScrollController(
             initialScrollOffset: controllers.lastOrNull?.offset ?? 0,
+            onDetach: detach,
           );
           controllers.add(controller);
           return SizedBox(
-            height: 30,
+            height: 70,
             child: ListView.builder(
               controller: controller,
               physics: const NeverScrollableScrollPhysics(
@@ -78,6 +85,17 @@ class _ExcelState extends State<Excel> {
               ),
               scrollDirection: Axis.horizontal,
               itemBuilder: (context, rowIndex) {
+                if ((columnIndex == 0 && rowIndex != 0) ||
+                    (columnIndex != 0 && rowIndex == 0)) {
+                  return Container(
+                    color: Colors.blue.withOpacity(0.1),
+                    width: 20,
+                    height: 70,
+                    child: Center(
+                        child: Text(
+                            columnIndex == 0 ? "$rowIndex" : "$columnIndex")),
+                  );
+                }
                 String cellKey = '$rowIndex-$columnIndex';
                 return GestureDetector(
                   onTap: () {
@@ -94,8 +112,8 @@ class _ExcelState extends State<Excel> {
                     });
                   },
                   child: Container(
-                    height: 50,
-                    width: 50,
+                    height: 70,
+                    width: 100,
                     decoration: BoxDecoration(
                       border: Border.all(
                         color: (activeRowIndex == rowIndex &&
@@ -103,6 +121,11 @@ class _ExcelState extends State<Excel> {
                                 isHighlighted)
                             ? Colors.blue
                             : Colors.black,
+                        width: (activeRowIndex == rowIndex &&
+                                activeColumnIndex == columnIndex &&
+                                isHighlighted)
+                            ? 10
+                            : 1,
                       ),
                     ),
                     child: isEditing &&
