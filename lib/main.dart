@@ -30,6 +30,25 @@ class _ExcelState extends State<Excel> {
   bool isEditing = false;
   bool isHighlighted = false;
   Map<String, String> cellValues = {};
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      // Add a listener to the viewport of each ScrollController
+      for (var controller in controllers) {
+        controller.addListener(scrollListener);
+      }
+    });
+  }
+
+  void scrollListener() {
+    setState(() {
+      controllers.removeWhere((controller) {
+        return !controller.position.isScrollingNotifier.value &&
+            controller.position.viewportDimension == 0.0;
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
